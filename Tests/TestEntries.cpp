@@ -57,9 +57,7 @@
 #include "VaryingRestitution.h"
 #include "VerticalStack.h"
 #include "Web.h"
-//#include "FooTest.h" // addition source code
 #include "rltest.h" // addition source code
-#include "practice.h" // addition source code
 #include "Invert.h"  // additoin source code
 
 TestEntry g_testEntries[] =
@@ -67,7 +65,6 @@ TestEntry g_testEntries[] =
 	{"Invert Test", Invert::Create},  // addition source code
 	{"RL Test", rltest::Create},  // addition source code
 	{"Continuous Test", ContinuousTest::Create},//change source code location
-	{"PRACTICE", practice::Create},  // addition source code
 	{"Time of Impact", TimeOfImpact::Create},
 	{"Ray-Cast", RayCast::Create},
 	{"One-Sided Platform", OneSidedPlatform::Create},

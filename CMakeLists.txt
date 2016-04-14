@@ -9,8 +9,8 @@ endif(COMMAND cmake_policy)
 
 # Define environment.c source files.
 set(Environment_SRCS
-	Tests/environment.cc
-	Tests/agent.cc
+	environment.cc
+	agent.cc
 )
 
 #Define rl_glue libraries.
@@ -33,7 +33,6 @@ set(Testbed_Framework_SRCS
 set(Testbed_Tests_SRCS
 	Tests/Invert.h
 	Tests/rltest.h
-	Tests/practice.h
 	Tests/TestEntries.cpp
 	Tests/ApplyForce.h
 	Tests/BodyTypes.h
