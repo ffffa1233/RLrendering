@@ -9,8 +9,8 @@ endif(COMMAND cmake_policy)
 
 # Define environment.c source files.
 set(Environment_SRCS
-	Tests/environment.cpp
-	Tests/agent.c
+	Tests/environment.cc
+	Tests/agent.cc
 )
 
 #Define rl_glue libraries.
