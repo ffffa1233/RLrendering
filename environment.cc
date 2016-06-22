@@ -28,7 +28,7 @@ const char *env_init(){
 									"[ACTIONS INT (0,1)] [REWARDS(-5.0 5.0)] "
 									"[EXTRA environment(C/C++) by PSC, CBH]";
 
-	allocateRLStruct(&this_observation,0,1,0);
+	allocateRLStruct(&this_observation,0,2,0);
 	this_reward_observation.observation = &this_observation;
 	this_reward_observation.reward = 0;
 	this_reward_observation.terminal = 0;
@@ -44,7 +44,6 @@ const observation_t *env_start(){
 
 	this_observation.doubleArray[0] = posx;
 	this_observation.doubleArray[1] = vel;
-
 	return &this_observation; 
 }
 
@@ -56,14 +55,16 @@ const reward_observation_terminal_t *env_step(const action_t *this_action){
 	int terminal = 0;
 
 	force = this_action->intArray[0];
+	posx = rl.get_position();
 
 	rl.apply_force(force);
+	
 	posx = rl.get_position(); 
 	vel = rl.get_velocity();
 	vel += 50;
 	terminal = check_terminal(posx, vel);
 	
-	printf("force %d, posx %lf, vel %lf, terminal %d\n",force, posx, vel, terminal);
+	//printf("force %d, posx %lf, vel %lf, terminal %d\n",force, posx, vel, terminal);
 	
 	the_reward = calculate_reward(posx, vel);
 	this_reward_observation.observation->doubleArray[0] = posx;

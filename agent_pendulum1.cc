@@ -21,38 +21,43 @@ double sarsa_gamma = 0.5;
 int extends = 1;
 
 int numActions=0;
-int numStates=0;
+int numAngles=0;
+int numAngleVelocity=0;
 int numVelocity=0;
 
 int policy_frozen=0;
 int exploring_frozen=0;
 
 int randInRange(int max);
-int egreedy(double state, double velocity);
-int calculateArrayIndex(double theState, double theVelocity, int theAction);
+int egreedy(double angle, double angleVelocity, double velocity);
+int calculateArrayIndex(double theAngle, double theAngleVelocity, 
+						double theVelocity, int theAction);
 void save_value_function(const char *fileName);
 void load_value_function(const char *fileName);
 
 void agent_init(const char* task_spec){
-//	printf("void agent_init\n");
 	allocateRLStruct(&this_action,1,0,0);
 	allocateRLStruct(&last_action,1,0,0);
 
-	last_observation=allocateRLStructPointer(0,2,0);
+	last_observation=allocateRLStructPointer(0,3,0);
 
-	numActions = 11; // -5 ~ 5
-	numStates = 51*extends; // 0 ~ 50
-	
+	numActions = 7; // -3 ~ 3
+	numAngles = 181*extends; // -90 ~ 90
+	numAngleVelocity = 101*extends; // -50 ~ 50
 	numVelocity = 101*extends; // -50 ~ 50
 
 	srand(time(0));
 	
-	value_function=(double *)calloc(numActions*numStates*numVelocity,sizeof(double));
+	value_function=(double *)calloc(numActions*numAngles*
+									numAngleVelocity*numVelocity, 
+									sizeof(double));
 	
 }
 
 const action_t *agent_start(const observation_t *this_observation){
-	int theIntAction=egreedy(this_observation->doubleArray[0], this_observation->doubleArray[1]);
+	int theIntAction = egreedy(this_observation->doubleArray[0], 
+								this_observation->doubleArray[1],
+								this_observation->doubleArray[2]);
 	this_action.intArray[0] = theIntAction;
 	
 	replaceRLStruct(&this_action, &last_action);
@@ -62,21 +67,33 @@ const action_t *agent_start(const observation_t *this_observation){
 }
 
 const action_t *agent_step(double reward, const observation_t *this_observation){
-	double newState=this_observation->doubleArray[0];
-	double newVelocity = this_observation->doubleArray[1];
-	double lastState=last_observation->doubleArray[0];
-	double lastVelocity = last_observation->doubleArray[1];
+	double newAngle = this_observation->doubleArray[0];
+	double newAngleVelocity = this_observation->doubleArray[1];
+	double newVelocity = this_observation->doubleArray[2];
 
-	int lastAction=last_action.intArray[0];
-	int newAction=egreedy(newState, newVelocity);
+	double lastAngle = last_observation->doubleArray[0];
+	double lastAngleVelocity = last_observation->doubleArray[1];
+	double lastVelocity = last_observation->doubleArray[2];
+
+	int lastAction = last_action.intArray[0];
+	int newAction = egreedy(newAngle, newAngleVelocity, newVelocity);
 	
-	double Q_sa=value_function[calculateArrayIndex(lastState,lastVelocity, lastAction)];
-	double Q_sprime_aprime=value_function[calculateArrayIndex(newState, newVelocity, newAction)];
+	double Q_sa = value_function[
+					calculateArrayIndex(lastAngle,lastAngleVelocity, 
+										lastVelocity, lastAction)
+					];
+	double Q_sprime_aprime = value_function[
+							calculateArrayIndex(newAngle, newAngleVelocity, 
+												newVelocity, newAction)
+							];
 	
 	double new_Q_sa=Q_sa + sarsa_stepsize * (reward + sarsa_gamma * Q_sprime_aprime - Q_sa);
+
 	if(!policy_frozen){
-		if(value_function[calculateArrayIndex(lastState, lastVelocity, lastAction)] < new_Q_sa){
-			value_function[calculateArrayIndex(lastState,lastVelocity, lastAction)] = new_Q_sa;
+		if(value_function[calculateArrayIndex(lastAngle,
+							lastAngleVelocity,lastVelocity, lastAction)] < new_Q_sa){
+			value_function[calculateArrayIndex(lastAngle,
+							lastAngleVelocity,lastVelocity, lastAction)] = new_Q_sa;
 		}
 	}
 	this_action.intArray[0]=newAction;
@@ -88,18 +105,24 @@ const action_t *agent_step(double reward, const observation_t *this_observation)
 }
 
 void agent_end(double reward){
-	double lastState=last_observation->doubleArray[0];
-	double lastVelocity=last_observation->doubleArray[1];
+	double lastAngle = last_observation->doubleArray[0];
+	double lastAngleVelocity = last_observation->doubleArray[1];
+	double lastVelocity = last_observation->doubleArray[2];
 
 	int lastAction=last_action.intArray[0];
 
-	double Q_sa=value_function[calculateArrayIndex(lastState,lastVelocity, lastAction)];
+	double Q_sa = value_function[
+					calculateArrayIndex(lastAngle,lastAngleVelocity, 
+										lastVelocity, lastAction)
+					];
 
 	double new_Q_sa=Q_sa + sarsa_stepsize * (reward - Q_sa);
 	
 	if(!policy_frozen){
-		if(value_function[calculateArrayIndex(lastState, lastVelocity, lastAction)] < new_Q_sa){
-			value_function[calculateArrayIndex(lastState,lastVelocity, lastAction)]=new_Q_sa;
+		if(value_function[calculateArrayIndex(lastAngle,
+							lastAngleVelocity,lastVelocity, lastAction)] < new_Q_sa){
+			value_function[calculateArrayIndex(lastAngle,
+							lastAngleVelocity,lastVelocity, lastAction)] = new_Q_sa;
 		}
 	}
 
@@ -165,7 +188,7 @@ void save_value_function(const char *fileName){
 	FILE *fp;
 	fp=fopen(fileName, "wb");
 
-	fwrite(value_function,sizeof(double),numStates*numActions*numVelocity,fp);
+	fwrite(value_function,sizeof(double),numActions*numAngles*numAngleVelocity*numVelocity,fp);
 	fclose(fp);
 }
 
@@ -173,21 +196,22 @@ void load_value_function(const char *fileName){
 	FILE *fp;
 	fp=fopen(fileName, "rb");
 
-	fread(value_function,sizeof(double),numStates*numActions*numVelocity,fp);
+	fread(value_function,sizeof(double),numActions*numAngles*numAngleVelocity*numVelocity,fp);
 	fclose(fp);
 }
 
-int egreedy(double state, double velocity){
+int egreedy(double angle, double angleVelocity, double velocity){
 	int maxIndex = 0;
 	int a = 1;
 	int randFrequency = (int)(1.0f/sarsa_epsilon);
 
 	for(a=1;a<numActions;a++){
-		if(value_function[calculateArrayIndex(state,velocity,a)] > value_function[calculateArrayIndex(state,velocity,maxIndex)]){
+		if(value_function[calculateArrayIndex(angle, angleVelocity, velocity,a)] > 
+			value_function[calculateArrayIndex(angle,angleVelocity, velocity,maxIndex)]){
 			maxIndex = a;
 		}
 	}
-	if(value_function[calculateArrayIndex(state,velocity,maxIndex)]==0.0){
+	if(value_function[calculateArrayIndex(angle, angleVelocity, velocity,maxIndex)]==0.0){
 		return randInRange(numActions-1);
 	}
 	return maxIndex;
@@ -200,9 +224,9 @@ int randInRange(int max){
 	return (int)x;
 }
 
-int calculateArrayIndex(double theState, double theVelocity, int theAction){
-	assert(theState<numStates);
-	assert(theAction<numActions);
-
-	return ((int)(theState*extends))*numActions*numVelocity+((int)(theVelocity*extends))*numActions+theAction;
+int calculateArrayIndex(double theAngle, double theAngleVelocity, 
+						double theVelocity, int theAction){
+	return ((int)(theAngle*extends))*numAngleVelocity*numVelocity*numActions
+			+((int)(theAngleVelocity*extends))*numVelocity*numActions
+			+((int)(theVelocity*extends))*numActions+theAction;
 }

@@ -7,10 +7,11 @@ if(COMMAND cmake_policy)
 	cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy) 
 
-# Define environment.c source files.
 set(Environment_SRCS
 	environment.cc
 	agent.cc
+#	environment_pendulum1.cc
+#	agent_pendulum1.cc
 )
 
 #Define rl_glue libraries.
@@ -31,7 +32,8 @@ set(Testbed_Framework_SRCS
 
 #define the test files.
 set(Testbed_Tests_SRCS
-	Tests/Invert.h
+#	Tests/Pendulum1.h
+#	Tests/Invert.h
 	Tests/rltest.h
 	Tests/TestEntries.cpp
 	Tests/ApplyForce.h

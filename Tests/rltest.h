@@ -18,6 +18,10 @@ class rltest : public Test
 	bool learning = true;
 	bool load = false;
 
+	double init_position = 35.0;
+	int success = 0;
+	int fail = 0;
+
 	public:
 	rltest() 
 	{	
@@ -25,7 +29,7 @@ class rltest : public Test
 		b2BodyDef myBodyDef;
 		myBodyDef.type = b2_dynamicBody;
 
-		myBodyDef.position.Set(35,0);
+		myBodyDef.position.Set(init_position,0);
 
 		//shape definition
 		b2PolygonShape polygonShape;
@@ -55,12 +59,19 @@ class rltest : public Test
 		printf("After Episode\tMean Return\tStandard Deviation\n---------------------------------------------------------------------\n");
 
 		RL_start();
+
+		RL_agent_message("load_policy results.dat");
+		RL_agent_message("freeze learning");
 	}
 
 	void reset(){
-		bodies->SetTransform(b2Vec2(35, 0), 0);
+		init_position = RandomFloat(0.0f, 50.0f);
+		bodies->SetTransform(b2Vec2(init_position, 0), 0);
 		bodies->SetLinearVelocity(b2Vec2(0, 0) );
 		bodies->SetAngularVelocity(0);
+
+		m_world->ClearForces();
+		
 		RL_start();
 	}
 
@@ -98,10 +109,28 @@ class rltest : public Test
 		Test::Step(settings);
 		
 		int isterminal = 0;
+		double reward = 0;
 		const reward_observation_action_terminal_t *rl_step_result = 0;
+		
+		
+		rl_step_result = RL_step();
+		isterminal = rl_step_result->terminal;
+		reward = rl_step_result->reward;
+		if(isterminal==1){
+			if(reward==100){
+				printf("success position : %lf\n",init_position);
+				success++;
+			}else{
+				printf("fail position : %lf\n",init_position);
+				fail++;
+			}
+			reset();
+		}
+		
+
 
 		/* if user press 's' key, learning will be false, then stop learning, save results.dat */
-		if(learning){
+/*		if(learning){
 			rl_step_result = RL_step();
 			isterminal = rl_step_result->terminal;
 		
@@ -109,14 +138,12 @@ class rltest : public Test
 				reset();
 				iter2++;
 			}
-		}
+		}*/
 
 		/*if user press 'l' key, then load results.dat */
-		if(load){
-			
+/*		if(load){
 			rl_step_result = RL_step();
 			isterminal = rl_step_result->terminal;
-
 			if(isterminal == 1){
 				reset();
 				iter2++;
@@ -124,13 +151,13 @@ class rltest : public Test
 
 			//RL_agent_message("unfreeze learning");
 		}
-
+*/
 		//show some information for the dynamic body
 		b2Vec2 pos = bodies->GetPosition();
 		float angle = bodies->GetAngle();
 		b2Vec2 vel = bodies->GetLinearVelocity();
 		float angularVel = bodies->GetAngularVelocity();
-		m_debugDraw.DrawString(5, m_textLine, "position:%.3f,%.3f, vel : %.3f, iteration : %d / %d, %d",pos.x, pos.y, vel.x, iter, iter/60, iter2);
+		m_debugDraw.DrawString(5, m_textLine, "position:%.3f,%.3f, vel : %.3f, success/fail : %d / %d",pos.x, pos.y, vel.x, success, fail);
 		m_textLine += 15;
 		iter++;
 	}
