@@ -63,8 +63,8 @@
 
 TestEntry g_testEntries[] =
 {
-//	{"Pendulum1", Pendulum1::Create},
-	{"RL Test", rltest::Create},  // addition source code
+	{"Pendulum1", Pendulum1::Create},  //addition source code
+//	{"RL Test", rltest::Create},  // addition source code
 //	{"Invert Test", Invert::Create},  // addition source code
 	{"Continuous Test", ContinuousTest::Create},//change source code location
 	{"Time of Impact", TimeOfImpact::Create},

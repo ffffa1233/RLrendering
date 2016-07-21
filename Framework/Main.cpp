@@ -22,6 +22,8 @@
 
 #include <cstdio>
 
+//#include "../Tests/Custom.h"
+
 namespace
 {
 	int32 testIndex = 0;
@@ -341,6 +343,11 @@ int main(int argc, char** argv)
 	//glutSetOption (GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
 
 	glutDisplayFunc(SimulationLoop);
+
+/*	int theConnection=0;
+	theConnection=setup_rlglue_network();
+	runEnvironmentEventLoop(theConnection);*/
+
 	GLUI_Master.set_glutReshapeFunc(Resize);  
 	GLUI_Master.set_glutKeyboardFunc(Keyboard);
 	GLUI_Master.set_glutSpecialFunc(KeyboardSpecial);
@@ -409,6 +416,6 @@ int main(int argc, char** argv)
 	glutTimerFunc(framePeriod, Timer, 0);
 
 	glutMainLoop();
-	
+
 	return 0;
 }

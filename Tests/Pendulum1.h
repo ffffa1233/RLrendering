@@ -1,43 +1,50 @@
 #ifndef PENDULUM1_H
 #define PENDULUM1_H
 
+#define DEGTORAD 0.0174532925199432957f
+#define RADTODEG 57.295779513082320876f
+
 #include <stdio.h>
 #include <rlglue/RL_glue.h>
 
+extern	b2Body* verticalBody;
+extern	b2Body* horizonBody;
+extern	b2Body* lineBody;
+
 class Pendulum1: public Test
 {
-	const char *task_spec;
+	const char *task_spec;	
 
-	b2Body* verticalBody;
-	b2Body* horizonBody;
-	b2Body* lineBody;
-
-	double init_position = 35.0;
+	double randomAngle = (rand()%40)+70;
 	int success = 0;
 	int fail = 0;
 
 	public:
 	Pendulum1() 
 	{	
+		randomAngle = (rand()%40)+70;
+
 		b2BodyDef myBodyDef;
 		myBodyDef.type = b2_dynamicBody;
 
 		b2PolygonShape rectangleShape;
-		rectangleShape.SetAsBox(0.5, 10);
+		rectangleShape.SetAsBox(10, 0.5);
 
 		b2FixtureDef rectangleFixtureDef;
 		rectangleFixtureDef.shape = &rectangleShape;
-		rectangleFixtureDef.density = 3;
+		rectangleFixtureDef.density = 1;
 
-		myBodyDef.position.Set(0, 15);
+		myBodyDef.position.Set(0, 14);
 		verticalBody = m_world->CreateBody(&myBodyDef);
 		verticalBody->CreateFixture(&rectangleFixtureDef);
+		
+		verticalBody->SetTransform(b2Vec2(9.95*cos(randomAngle*DEGTORAD), 14-(9.95-9.95*sin(randomAngle*DEGTORAD))), randomAngle*DEGTORAD);
 
 		rectangleShape.SetAsBox(6, 2);
 		rectangleFixtureDef.shape = &rectangleShape;
 		rectangleFixtureDef.density = 3;
 
-		myBodyDef.position.Set(0, 3);
+		myBodyDef.position.Set(0, 2);
 		horizonBody = m_world->CreateBody(&myBodyDef);
 		horizonBody->CreateFixture(&rectangleFixtureDef);
 
@@ -49,20 +56,18 @@ class Pendulum1: public Test
 
 		b2FixtureDef lineFixtureDef;
 		lineFixtureDef.shape = &lineShape;
-		lineFixtureDef.density = 1;
+		lineFixtureDef.density = 3;
 
 		lineBody = m_world->CreateBody(&myBodyDef);
 		lineBody->CreateFixture(&lineFixtureDef);
 
 		b2RevoluteJointDef upperJointDef;
-		upperJointDef.localAnchorA.Set(0, -9.95);
+		upperJointDef.localAnchorA.Set(-9.95, 0);
 		upperJointDef.localAnchorB.Set(0, 1.95);
-		upperJointDef.lowerAngle = -90 * DEGTORAD;
-		upperJointDef.upperAngle = 90 * DEGTORAD;
-		upperJointDef.enableLimit = true;
+
 		upperJointDef.bodyA = verticalBody;
 		upperJointDef.bodyB = horizonBody;
-		
+
 		m_world->CreateJoint(&upperJointDef);
 
 		printf("\nThis is a RL Test Program Pendulum1(Start)\n");
@@ -82,13 +87,15 @@ class Pendulum1: public Test
 
 
 	void reset(){
-
+		//printf("reset\n");
+		randomAngle = (rand()%40)+70;
+		
 		verticalBody->SetAngularVelocity(0);
 		verticalBody->SetLinearVelocity(b2Vec2(0, 0) );
-		verticalBody->SetTransform(b2Vec2(0, 15), 0);
+		verticalBody->SetTransform(b2Vec2(9.95*cos(randomAngle*DEGTORAD), 14-(9.95-9.95*sin(randomAngle*DEGTORAD))), randomAngle*DEGTORAD);
 
 		horizonBody->SetLinearVelocity(b2Vec2(0, 0) );
-		horizonBody->SetTransform(b2Vec2(0, 3), 0);
+		horizonBody->SetTransform(b2Vec2(0, 2), 0);
 
 		m_world->ClearForces();
 		
@@ -105,16 +112,15 @@ class Pendulum1: public Test
 		double reward = 0;
 		const reward_observation_action_terminal_t *rl_step_result = 0;
 		
-		
 		rl_step_result = RL_step();
 		isterminal = rl_step_result->terminal;
 		reward = rl_step_result->reward;
 		if(isterminal==1){
 			if(reward==100){
-				printf("success position : %lf\n",init_position);
+				printf("success angle : %lf, %lf\n",randomAngle,verticalBody->GetAngle()*RADTODEG);
 				success++;
 			}else{
-				printf("fail position : %lf\n",init_position);
+				printf("fail angle : %lf, %lf\n",randomAngle,verticalBody->GetAngle()*RADTODEG);
 				fail++;
 			}
 			reset();
@@ -127,12 +133,15 @@ class Pendulum1: public Test
 
 		m_debugDraw.DrawString(5, m_textLine, "position:%.3f,%.3f, angle : %.3f, vel : %.3f, angularvel : %.3f ",pos.x, pos.y, angle, vel.x, angularVel );
 		m_textLine += 15;
+		m_debugDraw.DrawString(5, m_textLine,"success : %d, fail : %d",success, fail);
+		m_textLine += 15;
 
 	}
 
 	public: void apply_force(int force)
 	{
-		horizonBody->ApplyForce(b2Vec2(force*100-5*100, 0), horizonBody->GetWorldCenter() );
+		//printf("apply force : %d\n",force);
+		horizonBody->ApplyForce(b2Vec2(force*5000-50*5000, 0), horizonBody->GetWorldCenter() );
 	}
 
 	public: double get_angle(){

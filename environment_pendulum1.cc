@@ -18,6 +18,10 @@ static reward_observation_terminal_t this_reward_observation;
 
 Pendulum1 pendulum1;
 
+b2Body* verticalBody;
+b2Body* horizonBody;
+b2Body* lineBody;
+
 int calculate_reward(double angle, double angleVel, double vel);
 int check_terminal(double angle, double angleVel, double vel);
 
@@ -41,14 +45,14 @@ const observation_t *env_start(){
 	double vel = 0.0;
 
 	angle = pendulum1.get_angle();
-	angleVel = pendulum1.get_angleVelocity()+50;
-	vel = pendulum1.get_velocity()+50;
+	angleVel = pendulum1.get_angleVelocity() + 3;
+	vel = pendulum1.get_velocity() + 50;
 
 	this_observation.doubleArray[0] = angle;
 	this_observation.doubleArray[1] = angleVel;
 	this_observation.doubleArray[2] = vel;
-	return &this_observation; 
-}
+	return &this_observation;
+ }
 
 const reward_observation_terminal_t *env_step(const action_t *this_action){
 	double the_reward = 0.0;
@@ -64,9 +68,9 @@ const reward_observation_terminal_t *env_step(const action_t *this_action){
 	pendulum1.apply_force(force);
 
 	angle = pendulum1.get_angle();
-	angleVel = pendulum1.get_angleVelocity()+50;
-	vel = pendulum1.get_velocity()+50;
-	
+	angleVel = pendulum1.get_angleVelocity() + 3;
+	vel = pendulum1.get_velocity() + 50;
+
 	terminal = check_terminal(angle, angleVel, vel);
 	the_reward = calculate_reward(angle, angleVel, vel);
 
@@ -89,15 +93,19 @@ const char* env_message(const char* inMessage){
 }
 
 int calculate_reward(double angle, double angleVel, double vel){
-    if((int)angle==90 && (int)angleVel==0 && (int)vel==0){
+    if((int)angle<=94 && (int)angle>=86 && (int)angleVel==3 && (int)vel==50){
         return 100;
     }
     return 0;
 }
   
 int check_terminal(double angle, double angleVel, double vel){
-    if((int)angle==90 && (int)angleVel==0 && (int)vel==0){
+	//printf("check terminal angle : %lf, angleVel : %lf, vel : %lf\n",angle, angleVel, vel);
+    if((int)angle<=94 && (int)angle>=86 && (int)angleVel==3 && (int)vel==50){
         return 1;
+    }
+    if((int)angle<=20 || (int)angle>=160){
+    	return 1;
     }
     return 0;
 }

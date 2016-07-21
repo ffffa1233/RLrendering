@@ -14,7 +14,7 @@ action_t last_action;
 observation_t *last_observation = 0;
 
 double* value_function=0;
-double sarsa_stepsize = 0.1;
+double sarsa_stepsize = 0.9;
 double sarsa_epsilon = 0.5;
 double sarsa_gamma = 0.5;
 
@@ -41,9 +41,9 @@ void agent_init(const char* task_spec){
 
 	last_observation=allocateRLStructPointer(0,3,0);
 
-	numActions = 7; // -3 ~ 3
+	numActions = 101; // -50 ~ 50
 	numAngles = 181*extends; // -90 ~ 90
-	numAngleVelocity = 101*extends; // -50 ~ 50
+	numAngleVelocity = 7*extends; // -3 ~ 3
 	numVelocity = 101*extends; // -50 ~ 50
 
 	srand(time(0));
@@ -59,7 +59,7 @@ const action_t *agent_start(const observation_t *this_observation){
 								this_observation->doubleArray[1],
 								this_observation->doubleArray[2]);
 	this_action.intArray[0] = theIntAction;
-	
+
 	replaceRLStruct(&this_action, &last_action);
 	replaceRLStruct(this_observation, last_observation);
 
@@ -145,12 +145,12 @@ void agent_cleanup(){
 const char* agent_message(const char* inMessage){
 	static char buffer[128];
 
-	if(strcmp(inMessage,"freeze learning")==0){printf("agent_message freeze\n");
+	if(strcmp(inMessage,"freeze learning")==0){//printf("agent_message freeze\n");
 		policy_frozen=1;
 		return "message understood, policy frozen";
 	}
 
-	if(strcmp(inMessage,"unfreeze learning")==0){printf("agent_message unfreeze\n");
+	if(strcmp(inMessage,"unfreeze learning")==0){//printf("agent_message unfreeze\n");
 		policy_frozen=0;
 		return "message understood, policy unfrozen";
 	}
