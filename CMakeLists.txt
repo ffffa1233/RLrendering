@@ -20,7 +20,7 @@ set(RLGLUE_LIBRARIES
 	rlutils
 	m
 	rlglue
-	rlgluenetdev
+#	rlgluenetdev
 )
 
 # Define the framework files.

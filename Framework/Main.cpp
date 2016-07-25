@@ -22,7 +22,16 @@
 
 #include <cstdio>
 
-//#include "../Tests/Custom.h"
+//#include <rlglue/RL_glue.h>
+
+#include "../environment_pendulum1.cc"
+#include <rlglue/Environment_common.h>
+
+#include "../agent_pendulum1.cc"
+#include <rlglue/Agent_common.h>
+
+#include <rlglue/utils/C/RLStruct_util.h>
+#include <rlglue/utils/C/TaskSpec_Parser.h>
 
 namespace
 {
@@ -93,6 +102,15 @@ void Timer(int)
 	glutTimerFunc(framePeriod, Timer, 0);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////
+const observation_t *last_state_main = 0;
+const action_t *last_action_main = 0;
+reward_observation_action_terminal_t roa_main = {0, 0, 0, 0};
+const reward_observation_terminal_t *ro_main;
+//int fforce;
+int start = 0;
+////////////////////////////////////////////////////////////////////////////////////////////
+
 void SimulationLoop()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -102,8 +120,36 @@ void SimulationLoop()
 
 	test->SetTextLine(30);
 	settings.hz = settingsHz;
-	test->Step(&settings);
+////////////////////////////////////////////////////////////////////////////////////////////
+	if(start==0){
+		last_state_main = env_start();
+		last_action_main = agent_start(last_state_main);
+		start = 1;
+	}else{
+		env_step1(last_action_main);
+		test->Step(&settings);
+		ro_main=env_step2();
 
+		if(ro_main->terminal == 1){
+			agent_end(ro_main->reward);
+			start = 0;
+		}else{
+			last_action_main = agent_step(ro_main->reward, last_state_main);
+		}
+
+	}
+////////////////////////////////////////////////////////////////////////////////////////////
+	/*test->Step(&settings);*/
+////////////////////////////////////////////////////////////////////////////////////////////
+	/*ro = env_step2();
+	this_reward = ro->reward;
+	last_state = ro->observation;
+	roa.reward = ro->reward;
+	roa.observation = ro->observation;
+	roa.terminal = ro->terminal;*/
+
+	
+////////////////////////////////////////////////////////////////////////////////////////////
 	test->DrawTitle(5, 15, entry->name);
 
 	glutSwapBuffers();
@@ -414,6 +460,22 @@ int main(int argc, char** argv)
 
 	// Use a timer to control the frame rate.
 	glutTimerFunc(framePeriod, Timer, 0);
+
+////////////////////////////////////////////////////////////////////////////////////////////
+	/*const char *task_spec;
+	printf("\nThis is a RL Test program(Start)\n");
+	task_spec = RL_init();
+	printf("\nTASK SPEC : %s\n",task_spec);
+   	printf("Starting offline demo\n----------------------------\nWill alternate learning for 25 episodes, then freeze policy and evaluate for 10 episodes.\n\n");
+	printf("After Episode\tMean Return\tStandard Deviation\n-------------------------------------------------------------------------\n");
+
+	oa = RL_start();
+
+	RL_agent_message("load_policy results.dat");
+	RL_agent_message("freeze learning");*/
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 	glutMainLoop();
 

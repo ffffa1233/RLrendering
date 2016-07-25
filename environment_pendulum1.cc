@@ -54,18 +54,41 @@ const observation_t *env_start(){
 	return &this_observation;
  }
 
-const reward_observation_terminal_t *env_step(const action_t *this_action){
-	double the_reward = 0.0;
-	int force = 0;
-	int terminal = 0;
+void env_step1(const action_t *this_action){
 
+	int force = 0;
+
+	force = this_action->intArray[0];
+	pendulum1.apply_force(force);
+/*
+	pendulum1.apply_force(force);
+
+	angle = pendulum1.get_angle();
+	angleVel = pendulum1.get_angleVelocity() + 3;
+	vel = pendulum1.get_velocity() + 50;
+
+	terminal = check_terminal(angle, angleVel, vel);
+	the_reward = calculate_reward(angle, angleVel, vel);
+
+	this_reward_observation.observation->doubleArray[0] = angle;
+	this_reward_observation.observation->doubleArray[1] = angleVel;
+	this_reward_observation.observation->doubleArray[2] = vel;
+
+	this_reward_observation.reward = the_reward;
+	this_reward_observation.terminal = terminal;
+	
+	return &this_reward_observation;*/
+}
+
+const reward_observation_terminal_t *env_step2() {
+	int terminal = 0;
+	double the_reward = 0.0;
 	double angle = 0.0;
 	double angleVel = 0.0;
 	double vel = 0.0;
 
-	force = this_action->intArray[0];
 
-	pendulum1.apply_force(force);
+	//pendulum1.apply_force(force);
 
 	angle = pendulum1.get_angle();
 	angleVel = pendulum1.get_angleVelocity() + 3;

@@ -7,9 +7,11 @@
 #include <stdio.h>
 #include <rlglue/RL_glue.h>
 
-extern	b2Body* verticalBody;
-extern	b2Body* horizonBody;
-extern	b2Body* lineBody;
+extern b2Body* verticalBody;
+extern b2Body* horizonBody;
+extern b2Body* lineBody;
+
+//extern int fforce;
 
 class Pendulum1: public Test
 {
@@ -78,10 +80,10 @@ class Pendulum1: public Test
 		printf("Starting offline demo\n------------------------\nWill alternate learning for 25 episodes, then freeze policy and evaluate for 10 episodes.\n\n");
 		printf("After Episode\tMean Return\tStandard Deviation\n---------------------------------------------------------------------\n");
 
-		RL_start();
+		//RL_start();
 
-		RL_agent_message("load_policy results.dat");
-		RL_agent_message("freeze learning");
+		//RL_agent_message("load_policy results.dat");
+		//RL_agent_message("freeze learning");
 
 	}
 
@@ -99,7 +101,7 @@ class Pendulum1: public Test
 
 		m_world->ClearForces();
 		
-		RL_start();
+		//RL_start();
 	}
 
 	
@@ -107,7 +109,7 @@ class Pendulum1: public Test
 	{
 		//run the default physics and rendering
 		Test::Step(settings);
-		
+		/*
 		int isterminal = 0;
 		double reward = 0;
 		const reward_observation_action_terminal_t *rl_step_result = 0;
@@ -124,7 +126,8 @@ class Pendulum1: public Test
 				fail++;
 			}
 			reset();
-		}
+		}*/
+		//apply_force(fforce);
 
 		b2Vec2 pos = horizonBody->GetPosition();
 		float angle = verticalBody->GetAngle()*RADTODEG;
