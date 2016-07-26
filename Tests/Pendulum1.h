@@ -136,8 +136,6 @@ class Pendulum1: public Test
 
 		m_debugDraw.DrawString(5, m_textLine, "position:%.3f,%.3f, angle : %.3f, vel : %.3f, angularvel : %.3f ",pos.x, pos.y, angle, vel.x, angularVel );
 		m_textLine += 15;
-		m_debugDraw.DrawString(5, m_textLine,"success : %d, fail : %d",success, fail);
-		m_textLine += 15;
 
 	}
 

@@ -14,6 +14,9 @@
 
 int calculate_reward(double angle, double angleVel, double vel);
 int check_terminal(double angle, double angleVel, double vel);
+
+void env_reset();
+
 const char *env_init();
 const observation_t *env_start();
 void env_step1(const action_t *this_action);

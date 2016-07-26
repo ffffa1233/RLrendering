@@ -14,6 +14,10 @@ b2Body* lineBody;
 static observation_t this_observation;
 static reward_observation_terminal_t this_reward_observation;
 
+void env_reset(){
+	pendulum1.reset();
+}
+
 
 const char *env_init(){
 	const char *task_spec_string = "[VERSION RL-GLue-3.0] [PROBLEMTYPE episodic] "
@@ -21,15 +25,18 @@ const char *env_init(){
 									"[ACTIONS (-3 3) ] [REWARDS 100 0 ] "
 									"[EXTRA environment(C/C++) by PSC, CBH]";
 
-	allocateRLStruct(&this_observation,0,3,0);
-	this_reward_observation.observation = &this_observation;
-	this_reward_observation.reward = 0;
-	this_reward_observation.terminal = 0;
+
 
 	return task_spec_string;
 }
 
 const observation_t *env_start(){
+
+	allocateRLStruct(&this_observation,0,3,0);
+	this_reward_observation.observation = &this_observation;
+	this_reward_observation.reward = 0;
+	this_reward_observation.terminal = 0;
+
 	double angle = 0.0;
 	double angleVel = 0.0;
 	double vel = 0.0;
@@ -41,6 +48,7 @@ const observation_t *env_start(){
 	this_observation.doubleArray[0] = angle;
 	this_observation.doubleArray[1] = angleVel;
 	this_observation.doubleArray[2] = vel;
+
 	return &this_observation;
  }
 
@@ -72,7 +80,7 @@ void env_step1(const action_t *this_action){
 
 const reward_observation_terminal_t *env_step2() {
 	int terminal = 0;
-	double the_reward = 0.0;
+	int the_reward = 0;
 	double angle = 0.0;
 	double angleVel = 0.0;
 	double vel = 0.0;
@@ -111,13 +119,15 @@ int calculate_reward(double angle, double angleVel, double vel){
     }
     return 0;
 }
-  
+  int cnt=1;
 int check_terminal(double angle, double angleVel, double vel){
-	//printf("check terminal angle : %lf, angleVel : %lf, vel : %lf\n",angle, angleVel, vel);
     if((int)angle<=94 && (int)angle>=86 && (int)angleVel==3 && (int)vel==50){
+    	cnt++;
+    	printf("check terminal angle : %lf, angleVel : %lf, vel : %lf cnt:%d\n",angle, angleVel, vel,cnt);
         return 1;
     }
     if((int)angle<=20 || (int)angle>=160){
+    	cnt++;
     	return 1;
     }
     return 0;

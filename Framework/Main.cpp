@@ -105,7 +105,7 @@ void Timer(int)
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 const observation_t *last_state_main = 0;
-const action_t *last_action_main = 0;
+static const action_t *last_action_main = 0;
 reward_observation_action_terminal_t roa_main = {0, 0, 0, 0};
 const reward_observation_terminal_t *ro_main;
 //int fforce;
@@ -130,12 +130,13 @@ void SimulationLoop()
 		env_step1(last_action_main);
 		test->Step(&settings);
 		ro_main=env_step2();
-
+		
 		if(ro_main->terminal == 1){
 			agent_end(ro_main->reward);
 			start = 0;
+			env_reset();
 		}else{
-			last_action_main = agent_step(ro_main->reward, last_state_main);
+			last_action_main = agent_step(ro_main->reward, ro_main->observation);
 		}
 
 	}
@@ -476,7 +477,8 @@ int main(int argc, char** argv)
 	RL_agent_message("freeze learning");*/
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-
+	/*agent_message("load_policy results.dat");
+	agent_message("freeze learning");*/
 
 	glutMainLoop();
 
