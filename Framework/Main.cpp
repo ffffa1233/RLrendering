@@ -24,14 +24,15 @@
 
 //#include <rlglue/RL_glue.h>
 
-#include "../environment_pendulum1.cc"
-#include <rlglue/Environment_common.h>
+//#include "../environment_pendulum1.cc"
+#include "../environment_pendulum1.h"
 
-#include "../agent_pendulum1.cc"
+//#include "../agent_pendulum1.cc"
 #include <rlglue/Agent_common.h>
-
 #include <rlglue/utils/C/RLStruct_util.h>
 #include <rlglue/utils/C/TaskSpec_Parser.h>
+
+#include "../Tests/Pendulum1.h"
 
 namespace
 {

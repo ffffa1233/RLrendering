@@ -5,7 +5,7 @@
 #define RADTODEG 57.295779513082320876f
 
 #include <stdio.h>
-#include <rlglue/RL_glue.h>
+//#include <rlglue/RL_glue.h>
 
 extern b2Body* verticalBody;
 extern b2Body* horizonBody;
@@ -74,12 +74,12 @@ class Pendulum1: public Test
 
 		printf("\nThis is a RL Test Program Pendulum1(Start)\n");
 		
-		task_spec = RL_init();
+	/*	task_spec = RL_init();
 
 		printf("\nTASK SPEC : %s\n",task_spec);
 		printf("Starting offline demo\n------------------------\nWill alternate learning for 25 episodes, then freeze policy and evaluate for 10 episodes.\n\n");
 		printf("After Episode\tMean Return\tStandard Deviation\n---------------------------------------------------------------------\n");
-
+*/
 		//RL_start();
 
 		//RL_agent_message("load_policy results.dat");

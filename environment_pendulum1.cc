@@ -1,20 +1,8 @@
-#include <string.h>
-#include <stdio.h>
-#include <time.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
 
-#include <rlglue/Environment_common.h>
-#include <rlglue/utils/C/RLStruct_util.h>
-#include <rlglue/utils/C/TaskSpec_Parser.h>
-#include <rlglue/RL_glue.h>
+#include "environment_pendulum1.h"
 
 #include "Framework/Test.h"
 #include "Tests/Pendulum1.h"
-
-static observation_t this_observation;
-static reward_observation_terminal_t this_reward_observation;
 
 Pendulum1 pendulum1;
 
@@ -22,8 +10,10 @@ b2Body* verticalBody;
 b2Body* horizonBody;
 b2Body* lineBody;
 
-int calculate_reward(double angle, double angleVel, double vel);
-int check_terminal(double angle, double angleVel, double vel);
+
+static observation_t this_observation;
+static reward_observation_terminal_t this_reward_observation;
+
 
 const char *env_init(){
 	const char *task_spec_string = "[VERSION RL-GLue-3.0] [PROBLEMTYPE episodic] "
