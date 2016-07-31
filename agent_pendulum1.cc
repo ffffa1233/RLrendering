@@ -56,23 +56,6 @@ void agent_init(const char* task_spec){
 }
 
 const action_t *agent_start(const observation_t *this_observation){
-
-	allocateRLStruct(&this_action,1,0,0);
-	allocateRLStruct(&last_action,1,0,0);
-
-	last_observation=allocateRLStructPointer(0,3,0);
-
-	numActions = 101; // -50 ~ 50
-	numAngles = 181*extends; // -90 ~ 90
-	numAngleVelocity = 7*extends; // -3 ~ 3
-	numVelocity = 101*extends; // -50 ~ 50
-
-	srand(time(0));
-	
-	value_function=(double *)calloc(numActions*numAngles*
-									numAngleVelocity*numVelocity, 
-									sizeof(double));
-
 	int theIntAction = egreedy(this_observation->doubleArray[0], 
 								this_observation->doubleArray[1],
 								this_observation->doubleArray[2]);

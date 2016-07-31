@@ -5,7 +5,7 @@
 #define RADTODEG 57.295779513082320876f
 
 #include <stdio.h>
-//#include <rlglue/RL_glue.h>
+#include <rlglue/RL_glue.h>
 
 extern b2Body* verticalBody;
 extern b2Body* horizonBody;
@@ -103,6 +103,19 @@ class Pendulum1: public Test
 		
 		//RL_start();
 	}
+
+/*	void Keyboard(unsigned char key){
+    switch (key)
+    {
+      case 's':
+        agent_message("save_policy results.dat");
+        printf("saved... value function\n");
+        break;
+      default:
+        //run default behaviour
+        Test::Keyboard(key);
+    }
+  	}*/
 
 	
 	void Step(Settings* settings)

@@ -25,18 +25,15 @@ const char *env_init(){
 									"[ACTIONS (-3 3) ] [REWARDS 100 0 ] "
 									"[EXTRA environment(C/C++) by PSC, CBH]";
 
-
-
-	return task_spec_string;
-}
-
-const observation_t *env_start(){
-
 	allocateRLStruct(&this_observation,0,3,0);
 	this_reward_observation.observation = &this_observation;
 	this_reward_observation.reward = 0;
 	this_reward_observation.terminal = 0;
 
+	return task_spec_string;
+}
+
+const observation_t *env_start(){
 	double angle = 0.0;
 	double angleVel = 0.0;
 	double vel = 0.0;
@@ -119,15 +116,13 @@ int calculate_reward(double angle, double angleVel, double vel){
     }
     return 0;
 }
-  int cnt=1;
+
 int check_terminal(double angle, double angleVel, double vel){
     if((int)angle<=94 && (int)angle>=86 && (int)angleVel==3 && (int)vel==50){
-    	cnt++;
-    	printf("check terminal angle : %lf, angleVel : %lf, vel : %lf cnt:%d\n",angle, angleVel, vel,cnt);
+    //	printf("check terminal angle : %lf, angleVel : %lf, vel : %lf cnt:%d\n",angle, angleVel, vel,cnt);
         return 1;
     }
     if((int)angle<=20 || (int)angle>=160){
-    	cnt++;
     	return 1;
     }
     return 0;

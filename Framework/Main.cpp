@@ -111,6 +111,8 @@ const reward_observation_terminal_t *ro_main;
 //int fforce;
 int start = 0;
 ////////////////////////////////////////////////////////////////////////////////////////////
+int success = 0;
+int fail = 0;
 
 void SimulationLoop()
 {
@@ -135,6 +137,13 @@ void SimulationLoop()
 			agent_end(ro_main->reward);
 			start = 0;
 			env_reset();
+			if(ro_main->reward==100){
+				success++;
+				printf("success %d\tfail %d\tprob %lf\n",success,fail,(double)success/(double)(success+fail)*100);
+			}else{
+				fail++;
+			}
+			//test->Step(&settings);
 		}else{
 			last_action_main = agent_step(ro_main->reward, ro_main->observation);
 		}
@@ -229,6 +238,20 @@ void Keyboard(unsigned char key, int x, int y)
 		glui->sync_live();
 		break;
 		
+	case 's':
+        agent_message("save_policy results.dat");
+        printf("saved... value function\n");
+        break;
+    case 'l':
+    	agent_message("load_policy results.dat");
+    	printf("load... value function\n");
+    	success = 0;
+    	fail = 0;
+    	break;
+    	case 'f':
+    	agent_message("freeze learning");
+    	break;
+
 	default:
 		if (test)
 		{
@@ -475,9 +498,14 @@ int main(int argc, char** argv)
 
 	RL_agent_message("load_policy results.dat");
 	RL_agent_message("freeze learning");*/
-////////////////////////////////////////////////////////////////////////////////////////////
 
-	/*agent_message("load_policy results.dat");
+	const char* task_spec;
+	task_spec = env_init();
+	agent_init(task_spec);
+
+////////////////////////////////////////////////////////////////////////////////////////////
+/*
+	agent_message("load_policy results.dat");
 	agent_message("freeze learning");*/
 
 	glutMainLoop();
