@@ -119,7 +119,6 @@ int calculate_reward(double angle, double angleVel, double vel){
 
 int check_terminal(double angle, double angleVel, double vel){
     if((int)angle<=94 && (int)angle>=86 && (int)angleVel==3 && (int)vel==50){
-    //	printf("check terminal angle : %lf, angleVel : %lf, vel : %lf cnt:%d\n",angle, angleVel, vel,cnt);
         return 1;
     }
     if((int)angle<=20 || (int)angle>=160){
