@@ -10,6 +10,7 @@ b2Body* verticalBody;
 b2Body* horizonBody;
 b2Body* lineBody;
 
+b2Body* verticalBody2;
 
 static observation_t this_observation;
 static reward_observation_terminal_t this_reward_observation;

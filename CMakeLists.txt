@@ -37,6 +37,7 @@ set(Testbed_Framework_SRCS
 #define the test files.
 set(Testbed_Tests_SRCS
 	Tests/Pendulum1.h
+	Tests/Pendulum2.h
 #	Tests/Invert.h
 #	Tests/rltest.h
 	Tests/TestEntries.cpp

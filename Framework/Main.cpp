@@ -403,6 +403,7 @@ int main(int argc, char** argv)
 	testSelection = testIndex;
 
 	entry = g_testEntries + testIndex;
+
 	test = entry->createFcn();
 
 	glutInit(&argc, argv);
