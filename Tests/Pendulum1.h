@@ -21,6 +21,8 @@ class Pendulum1: public Test
 	int success = 0;
 	int fail = 0;
 
+	b2PrismaticJoint* m_joint;
+
 	public:
 	Pendulum1() 
 	{	
@@ -34,7 +36,7 @@ class Pendulum1: public Test
 
 		b2FixtureDef rectangleFixtureDef;
 		rectangleFixtureDef.shape = &rectangleShape;
-		rectangleFixtureDef.density = 1;
+		rectangleFixtureDef.density = 20;
 
 		myBodyDef.position.Set(0, 14);
 		verticalBody = m_world->CreateBody(&myBodyDef);
@@ -44,7 +46,7 @@ class Pendulum1: public Test
 
 		rectangleShape.SetAsBox(6, 2);
 		rectangleFixtureDef.shape = &rectangleShape;
-		rectangleFixtureDef.density = 3;
+		rectangleFixtureDef.density = 1;
 
 		myBodyDef.position.Set(0, 2);
 		horizonBody = m_world->CreateBody(&myBodyDef);
@@ -71,6 +73,14 @@ class Pendulum1: public Test
 		upperJointDef.bodyB = horizonBody;
 
 		m_world->CreateJoint(&upperJointDef);
+
+		b2PrismaticJointDef pjd;
+
+		b2Vec2 axis(1.0f, 0.0f);
+		axis.Normalize();
+		pjd.Initialize(lineBody, horizonBody, b2Vec2(0.0f, 0.0f), axis);
+
+		m_joint = (b2PrismaticJoint*)m_world->CreateJoint(&pjd);
 
 		printf("\nThis is a RL Test Program Pendulum1(Start)\n");
 		
