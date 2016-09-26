@@ -10,9 +10,12 @@ endif(COMMAND cmake_policy)
 set(Environment_SRCS
 #	environment.cc
 #	agent.cc
-	environment_pendulum1.h
-	environment_pendulum1.cc
-	agent_pendulum1.cc
+#	environment_pendulum1.h
+#	environment_pendulum1.cc
+#	agent_pendulum1.cc
+	environment_pendulum2.h
+	environment_pendulum2.cc
+	agent_pendulum2.cc
 #	Tests/Custom_Integrated_Env_Codec.cpp
 )
 
@@ -20,7 +23,7 @@ set(Environment_SRCS
 set(RLGLUE_LIBRARIES
 	rlutils
 	m
-#	rlglue
+	rlglue
 #	rlgluenetdev
 )
 
@@ -36,7 +39,7 @@ set(Testbed_Framework_SRCS
 
 #define the test files.
 set(Testbed_Tests_SRCS
-	Tests/Pendulum1.h
+#	Tests/Pendulum1.h
 	Tests/Pendulum2.h
 #	Tests/Invert.h
 #	Tests/rltest.h

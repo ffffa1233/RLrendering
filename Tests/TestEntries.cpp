@@ -59,13 +59,13 @@
 #include "Web.h"
 //#include "rltest.h" // addition source code
 //#include "Invert.h"  // addition source code
-#include "Pendulum1.h"  // addition source code
+//#include "Pendulum1.h"  // addition source code
 #include "Pendulum2.h"  // addition source code
 
 TestEntry g_testEntries[] =
 {
-//	{"Pendulum2", Pendulum2::Create},  //addition source code
-	{"Pendulum1", Pendulum1::Create},  //addition source code
+	{"Pendulum2", Pendulum2::Create},  //addition source code
+//	{"Pendulum1", Pendulum1::Create},  //addition source code
 //	{"RL Test", rltest::Create},  // addition source code
 //	{"Invert Test", Invert::Create},  // addition source code
 	{"Continuous Test", ContinuousTest::Create},//change source code location

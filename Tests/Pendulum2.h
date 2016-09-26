@@ -20,6 +20,8 @@ class Pendulum2: public Test
 	const char *task_spec;	
 
 	double randomAngle = (rand()%40)+70;
+	double randomAngle2 = (rand()%80)+50;
+
 	int success = 0;
 	int fail = 0;
 
@@ -29,6 +31,7 @@ class Pendulum2: public Test
 	Pendulum2() 
 	{	
 		randomAngle = (rand()%40)+70;
+		randomAngle2 = (rand()%80)+50;
 
 		b2BodyDef myBodyDef;
 		myBodyDef.type = b2_dynamicBody;
@@ -40,20 +43,30 @@ class Pendulum2: public Test
 		rectangleFixtureDef.shape = &rectangleShape;
 		rectangleFixtureDef.density = 20;
 
-		myBodyDef.position.Set(0, 14);
+	//	myBodyDef.position.Set(0, 14);
 		verticalBody = m_world->CreateBody(&myBodyDef);
 		verticalBody->CreateFixture(&rectangleFixtureDef);
 		
-		verticalBody->SetTransform(b2Vec2(9.95*cos(randomAngle*DEGTORAD), 14-(9.95-9.95*sin(randomAngle*DEGTORAD))), randomAngle*DEGTORAD);
+		verticalBody->SetTransform(b2Vec2(9.95*cos(randomAngle*DEGTORAD), 9.95*sin(randomAngle*DEGTORAD)+4.05), randomAngle*DEGTORAD);
 
 //////////////////////////////////////////
 		rectangleShape.SetAsBox(10, 0.5);
+
 		rectangleFixtureDef.shape = &rectangleShape;
 		rectangleFixtureDef.density = 20;
-		myBodyDef.position.Set(0, 14);
+
 		verticalBody2 = m_world->CreateBody(&myBodyDef);
+		
+		verticalBody2->SetTransform(
+						b2Vec2(
+							19.95*cos(randomAngle*DEGTORAD)+9.95*cos(randomAngle2*DEGTORAD), 
+							19.95*sin(randomAngle*DEGTORAD)+9.95*sin(randomAngle2*DEGTORAD)+4.05
+							),
+						randomAngle2*DEGTORAD
+			);		
+
 		verticalBody2->CreateFixture(&rectangleFixtureDef);
-		verticalBody2->SetTransform(b2Vec2(19.95*cos(randomAngle*DEGTORAD)+9.95*cos(randomAngle*DEGTORAD), 19.95*sin(randomAngle*DEGTORAD)+14-(9.95-9.95*sin(randomAngle*DEGTORAD))), randomAngle*DEGTORAD);
+
 //////////////////////////////////////////
 
 		rectangleShape.SetAsBox(6, 2);
@@ -127,10 +140,23 @@ class Pendulum2: public Test
 	void reset(){
 		//printf("reset\n");
 		randomAngle = (rand()%40)+70;
+		randomAngle2 = (rand()%80)+50;
 		
 		verticalBody->SetAngularVelocity(0);
 		verticalBody->SetLinearVelocity(b2Vec2(0, 0) );
 		verticalBody->SetTransform(b2Vec2(9.95*cos(randomAngle*DEGTORAD), 14-(9.95-9.95*sin(randomAngle*DEGTORAD))), randomAngle*DEGTORAD);
+
+///////////////////////////////////////////////////////
+		verticalBody2->SetAngularVelocity(0);
+		verticalBody2->SetLinearVelocity(b2Vec2(0, 0) );
+		verticalBody2->SetTransform(
+						b2Vec2(
+							19.95*cos(randomAngle*DEGTORAD)+9.95*cos(randomAngle2*DEGTORAD), 
+							19.95*sin(randomAngle*DEGTORAD)+9.95*sin(randomAngle2*DEGTORAD)+4.05
+							),
+						randomAngle2*DEGTORAD
+			);	
+///////////////////////////////////////////////////////
 
 		horizonBody->SetLinearVelocity(b2Vec2(0, 0) );
 		horizonBody->SetTransform(b2Vec2(0, 2), 0);
