@@ -48,10 +48,10 @@ const observation_t *env_start(){
 	angle_footbody = pendulum2.get_angle_footbody();
 	angleVelocity_footbody = pendulum2.get_angleVelocity_footbody() + 2;
 
-	this_observation.doubleArray[0] = angle_footleg;
+	this_observation.doubleArray[0] = angle_footleg/18;
 	this_observation.doubleArray[1] = angleVelocity_footleg;
 	this_observation.doubleArray[2] = velocity_foot;
-	this_observation.doubleArray[3] = angle_footbody;
+	this_observation.doubleArray[3] = angle_footbody/18;
 	this_observation.doubleArray[4] = angleVelocity_footbody;
 
 	return &this_observation;
@@ -68,6 +68,7 @@ void env_step1(const action_t *this_action){
 	force_waist = this_action->intArray[1];
 	force_heap = this_action->intArray[2];
 
+//printf("foot, waist, heap %d, %d, %d\n",force_foot, force_waist, force_heap);
 	pendulum2.apply_force_foot(force_foot);
 	pendulum2.apply_force_waist(force_waist);
 	pendulum2.apply_force_heap(force_heap);
@@ -101,14 +102,18 @@ const reward_observation_terminal_t *env_step2() {
 	the_reward = calculate_reward(angle_footleg, angleVelocity_footleg, velocity_foot, 
 					angle_footbody, angleVelocity_footbody);
 
-	this_reward_observation.observation->doubleArray[0] = angle_footleg;
+	this_reward_observation.observation->doubleArray[0] = angle_footleg/18;
 	this_reward_observation.observation->doubleArray[1] = angleVelocity_footleg;
 	this_reward_observation.observation->doubleArray[2] = velocity_foot;
-	this_reward_observation.observation->doubleArray[3] = angle_footbody;
+	this_reward_observation.observation->doubleArray[3] = angle_footbody/18;
 	this_reward_observation.observation->doubleArray[4] = angleVelocity_footbody;
 
 	this_reward_observation.reward = the_reward;
 	this_reward_observation.terminal = terminal;
+
+	if(the_reward==100){
+		printf("success : %lf, %lf\n",angle_footleg, angle_footbody);
+	}
 	
 	return &this_reward_observation;
 }
@@ -123,7 +128,8 @@ const char* env_message(const char* inMessage){
 
 int calculate_reward(double angle_footleg, double angleVelocity_footleg, double velocity_foot, 
 					double angle_footbody, double angleVelocity_footbody){
-    if( 
+	
+    /*if( 
     	(int)angle_footleg<=94 && (int)angle_footleg>=86 
     	&&
     	(int)angleVelocity_footleg==2
@@ -135,12 +141,16 @@ int calculate_reward(double angle_footleg, double angleVelocity_footleg, double 
     	(int)angleVelocity_footbody==2 
     ){
         return 100;
-    }
+    }*/
+    if(angle_footleg>=80 && angle_footleg<=100 && angle_footbody >=80 && angle_footbody <= 100){
+    	return 100;
+     }
     return 0;
 }
 
 int check_terminal(double angle_footleg, double angleVelocity_footleg, double velocity_foot, 
 					double angle_footbody, double angleVelocity_footbody){
+/*
 	if( 
     	(int)angle_footleg<=94 && (int)angle_footleg>=86 
     	&&
@@ -153,9 +163,14 @@ int check_terminal(double angle_footleg, double angleVelocity_footleg, double ve
     	(int)angleVelocity_footbody==2 
     ){
         return 1;
+    }*/
+    if(angle_footleg>=80 && angle_footleg<=100 && angle_footbody >=80 && angle_footbody <= 100){
+    	return 1;
+     }
+    if((int)angle_footleg<=45 || (int)angle_footleg>=135){
+    	return 1;
     }
-    
-    if((int)angle_footleg<=10 || (int)angle_footleg>=170){
+    if((int)angle_footbody<=20 || (int)angle_footbody>=160){
     	return 1;
     }
     return 0;

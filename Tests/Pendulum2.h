@@ -173,25 +173,25 @@ class Pendulum2: public Test
 	public: void apply_force_foot(int force_foot)
 	{
 		//force
-		horizonBody->ApplyForce(b2Vec2((force_foot-10)*1, 0), horizonBody->GetWorldCenter() );
+		horizonBody->ApplyForce(b2Vec2((force_foot-5)*1, 0), horizonBody->GetWorldCenter() );
 	}
 	public: void apply_force_waist(int force_waist)
 	{
 		//torque	
 		//SetMotorSpeed((force_waist-18)*10*DEGTORAD);	
-		verticalBody2->ApplyForce(b2Vec2((force_waist-10)*1, 0), verticalBody2->GetWorldPoint(b2Vec2(10, 0.5)));
+		verticalBody2->ApplyForce(b2Vec2((force_waist-11)*1000, 0), verticalBody2->GetWorldCenter()  );
 	}
 	public: void apply_force_heap(int force_heap)
 	{
 		//force
-		verticalBody->ApplyForce(b2Vec2((force_heap-10)*1, 0), verticalBody->GetWorldPoint(b2Vec2(10, -0.5)));
+		verticalBody->ApplyForce(b2Vec2((force_heap-9)*100, 0), verticalBody->GetWorldPoint(b2Vec2(10, -0.5)));
 	}
 
 	public: double get_angle_footleg(){
-		return verticalBody->GetAngle()*RADTODEG / 6;
+		return verticalBody->GetAngle()*RADTODEG;
 	}
 	public: double get_angle_footbody(){
-		return verticalBody2->GetAngle()*RADTODEG / 6;
+		return verticalBody2->GetAngle()*RADTODEG;
 	}
 
 	public: double get_angleVelocity_footleg()
