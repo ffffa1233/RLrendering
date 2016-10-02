@@ -129,7 +129,7 @@ const char* env_message(const char* inMessage){
 int calculate_reward(double angle_footleg, double angleVelocity_footleg, double velocity_foot, 
 					double angle_footbody, double angleVelocity_footbody){
 	
-    /*if( 
+    if( 
     	(int)angle_footleg<=94 && (int)angle_footleg>=86 
     	&&
     	(int)angleVelocity_footleg==2
@@ -141,16 +141,17 @@ int calculate_reward(double angle_footleg, double angleVelocity_footleg, double 
     	(int)angleVelocity_footbody==2 
     ){
         return 100;
-    }*/
+    }
+    /*
     if(angle_footleg>=80 && angle_footleg<=100 && angle_footbody >=80 && angle_footbody <= 100){
     	return 100;
-     }
+     }*/
     return 0;
 }
 
 int check_terminal(double angle_footleg, double angleVelocity_footleg, double velocity_foot, 
 					double angle_footbody, double angleVelocity_footbody){
-/*
+
 	if( 
     	(int)angle_footleg<=94 && (int)angle_footleg>=86 
     	&&
@@ -163,10 +164,10 @@ int check_terminal(double angle_footleg, double angleVelocity_footleg, double ve
     	(int)angleVelocity_footbody==2 
     ){
         return 1;
-    }*/
-    if(angle_footleg>=80 && angle_footleg<=100 && angle_footbody >=80 && angle_footbody <= 100){
+    }
+    /*if(angle_footleg>=80 && angle_footleg<=100 && angle_footbody >=80 && angle_footbody <= 100){
     	return 1;
-     }
+     }*/
     if((int)angle_footleg<=45 || (int)angle_footleg>=135){
     	return 1;
     }

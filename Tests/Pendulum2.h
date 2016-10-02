@@ -179,12 +179,12 @@ class Pendulum2: public Test
 	{
 		//torque	
 		//SetMotorSpeed((force_waist-18)*10*DEGTORAD);	
-		verticalBody2->ApplyForce(b2Vec2((force_waist-11)*1000, 0), verticalBody2->GetWorldCenter()  );
+		verticalBody2->ApplyForce(b2Vec2((force_waist-11)*600, 0), verticalBody2->GetWorldCenter()  );
 	}
 	public: void apply_force_heap(int force_heap)
 	{
 		//force
-		verticalBody->ApplyForce(b2Vec2((force_heap-9)*100, 0), verticalBody->GetWorldPoint(b2Vec2(10, -0.5)));
+		verticalBody->ApplyForce(b2Vec2((force_heap-9)*300, 0), verticalBody->GetWorldPoint(b2Vec2(10, -0.5)));
 	}
 
 	public: double get_angle_footleg(){
