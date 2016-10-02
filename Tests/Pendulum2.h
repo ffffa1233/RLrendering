@@ -41,9 +41,8 @@ class Pendulum2: public Test
 
 		b2FixtureDef rectangleFixtureDef;
 		rectangleFixtureDef.shape = &rectangleShape;
-		rectangleFixtureDef.density = 20;
+		rectangleFixtureDef.density = 1.5;
 
-	//	myBodyDef.position.Set(0, 14);
 		verticalBody = m_world->CreateBody(&myBodyDef);
 		verticalBody->CreateFixture(&rectangleFixtureDef);
 		
@@ -53,7 +52,7 @@ class Pendulum2: public Test
 		rectangleShape.SetAsBox(10, 0.5);
 
 		rectangleFixtureDef.shape = &rectangleShape;
-		rectangleFixtureDef.density = 20;
+		rectangleFixtureDef.density = 1.5;
 
 		verticalBody2 = m_world->CreateBody(&myBodyDef);
 		
@@ -69,9 +68,9 @@ class Pendulum2: public Test
 
 //////////////////////////////////////////
 
-		rectangleShape.SetAsBox(6, 2);
+		rectangleShape.SetAsBox(2.5, 2);
 		rectangleFixtureDef.shape = &rectangleShape;
-		rectangleFixtureDef.density = 1;
+		rectangleFixtureDef.density = 0.05;
 
 		myBodyDef.position.Set(0, 2);
 		horizonBody = m_world->CreateBody(&myBodyDef);
@@ -85,7 +84,7 @@ class Pendulum2: public Test
 
 		b2FixtureDef lineFixtureDef;
 		lineFixtureDef.shape = &lineShape;
-		lineFixtureDef.density = 3;
+		lineFixtureDef.density = 1;
 
 		lineBody = m_world->CreateBody(&myBodyDef);
 		lineBody->CreateFixture(&lineFixtureDef);
@@ -123,16 +122,6 @@ class Pendulum2: public Test
 
 		printf("\nThis is a RL Test Program Pendulum2(Start)\n");
 		
-	/*	task_spec = RL_init();
-
-		printf("\nTASK SPEC : %s\n",task_spec);
-		printf("Starting offline demo\n------------------------\nWill alternate learning for 25 episodes, then freeze policy and evaluate for 10 episodes.\n\n");
-		printf("After Episode\tMean Return\tStandard Deviation\n---------------------------------------------------------------------\n");
-*/
-		//RL_start();
-
-		//RL_agent_message("load_policy results.dat");
-		//RL_agent_message("freeze learning");
 
 	}
 
@@ -162,74 +151,59 @@ class Pendulum2: public Test
 		horizonBody->SetTransform(b2Vec2(0, 2), 0);
 
 		m_world->ClearForces();
-		
-		//RL_start();
+
 	}
 
-/*	void Keyboard(unsigned char key){
-    switch (key)
-    {
-      case 's':
-        agent_message("save_policy results.dat");
-        printf("saved... value function\n");
-        break;
-      default:
-        //run default behaviour
-        Test::Keyboard(key);
-    }
-  	}*/
-
-	
 	void Step(Settings* settings)
 	{
 		//run the default physics and rendering
 		Test::Step(settings);
-		/*
-		int isterminal = 0;
-		double reward = 0;
-		const reward_observation_action_terminal_t *rl_step_result = 0;
-		
-		rl_step_result = RL_step();
-		isterminal = rl_step_result->terminal;
-		reward = rl_step_result->reward;
-		if(isterminal==1){
-			if(reward==100){
-				printf("success angle : %lf, %lf\n",randomAngle,verticalBody->GetAngle()*RADTODEG);
-				success++;
-			}else{
-				printf("fail angle : %lf, %lf\n",randomAngle,verticalBody->GetAngle()*RADTODEG);
-				fail++;
-			}
-			reset();
-		}*/
-		//apply_force(fforce);
 
 		b2Vec2 pos = horizonBody->GetPosition();
 		float angle = verticalBody->GetAngle()*RADTODEG;
 		b2Vec2 vel = horizonBody->GetLinearVelocity();
 		float angularVel = verticalBody->GetAngularVelocity();
 
-		m_debugDraw.DrawString(5, m_textLine, "position:%.3f,%.3f, angle : %.3f, vel : %.3f, angularvel : %.3f ",pos.x, pos.y, angle, vel.x, angularVel );
+		m_debugDraw.DrawString(5, m_textLine, "position:%.3f,%.3f, angle : %.3f, vel : %.3f, angularvel : %.3f ",
+							pos.x, pos.y, angle, vel.x, angularVel );
 		m_textLine += 15;
 
 	}
 
-	public: void apply_force(int force)
+	public: void apply_force_foot(int force_foot)
 	{
-		//printf("apply force : %d\n",force);
-		horizonBody->ApplyForce(b2Vec2(force*5000-50*5000, 0), horizonBody->GetWorldCenter() );
+		//force
+		horizonBody->ApplyForce(b2Vec2((force_foot-10)*1, 0), horizonBody->GetWorldCenter() );
+	}
+	public: void apply_force_waist(int force_waist)
+	{
+		//torque	
+		//SetMotorSpeed((force_waist-18)*10*DEGTORAD);	
+		verticalBody2->ApplyForce(b2Vec2((force_waist-10)*1, 0), verticalBody2->GetWorldPoint(b2Vec2(10, 0.5)));
+	}
+	public: void apply_force_heap(int force_heap)
+	{
+		//force
+		verticalBody->ApplyForce(b2Vec2((force_heap-10)*1, 0), verticalBody->GetWorldPoint(b2Vec2(10, -0.5)));
 	}
 
-	public: double get_angle(){
-		return verticalBody->GetAngle()*RADTODEG;
+	public: double get_angle_footleg(){
+		return verticalBody->GetAngle()*RADTODEG / 6;
+	}
+	public: double get_angle_footbody(){
+		return verticalBody2->GetAngle()*RADTODEG / 6;
 	}
 
-	public: double get_angleVelocity()
+	public: double get_angleVelocity_footleg()
 	{
 		return verticalBody->GetAngularVelocity();
 	}
+	public: double get_angleVelocity_footbody()
+	{
+		return verticalBody2->GetAngularVelocity();
+	}
 
-	public: double get_velocity()
+	public: double get_velocity_foot()
 	{
 		return horizonBody->GetLinearVelocity().x;
 	}

@@ -9,11 +9,10 @@
 #include <rlglue/utils/C/TaskSpec_Parser.h>
 #include <rlglue/RL_glue.h>
 
-
-
-
-int calculate_reward(double angle, double angleVel, double vel);
-int check_terminal(double angle, double angleVel, double vel);
+int calculate_reward(double angle_footleg, double angleVelocity_footleg, double velocity_foot, 
+					double angle_footbody, double angleVelocity_footbody);
+int check_terminal(double angle_footleg, double angleVelocity_footleg, double velocity_foot, 
+					double angle_footbody, double angleVelocity_footbody);
 
 void env_reset();
 

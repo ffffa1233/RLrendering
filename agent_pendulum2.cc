@@ -14,52 +14,118 @@ action_t this_action;
 action_t last_action;
 observation_t *last_observation = 0;
 
-double* value_function=0;
+double* value_function_foot = 0;
+double* value_function_waist = 0;
+double* value_function_heap = 0;
+
 double sarsa_stepsize = 0.9;
 double sarsa_epsilon = 0.5;
 double sarsa_gamma = 0.5;
 
 int extends = 1;
 
-int numActions=0;
-int numAngles=0;
-int numAngleVelocity=0;
-int numVelocity=0;
+int numActions_foot = 0;
+int numActions_waist = 0;
+int numActions_heap = 0;
+
+int numAngles_footleg = 0;
+int numAngles_footbody = 0;
+int numAngleVelocity_footleg = 0;
+int numAngleVelocity_footbody = 0;
+int numVelocity_foot = 0;
 
 int policy_frozen=0;
 int exploring_frozen=0;
 
 int randInRange(int max);
-int egreedy(double angle, double angleVelocity, double velocity);
-int calculateArrayIndex(double theAngle, double theAngleVelocity, 
-						double theVelocity, int theAction);
+
+int egreedy(double angle_footleg, double angleVelocity_footleg, double velocity_foot, double angle_footbody, double angleVelocity_footbody, int tmp);
+
+int calculateArrayIndex_foot(double angle_footleg, double angleVelocity_footleg, 
+							double velocity_foot, double angle_footbody, double angleVelocity_footbody, int action);
+int calculateArrayIndex_waist(double angle_footleg, double angleVelocity_footleg, 
+							double velocity_foot, double angle_footbody, double angleVelocity_footbody, int action);
+int calculateArrayIndex_heap(double angle_footleg, double angleVelocity_footleg, 
+							double velocity_foot, double angle_footbody, double angleVelocity_footbody, int action);
+
 void save_value_function(const char *fileName);
 void load_value_function(const char *fileName);
 
 void agent_init(const char* task_spec){
-	allocateRLStruct(&this_action,1,0,0);
-	allocateRLStruct(&last_action,1,0,0);
+	allocateRLStruct(&this_action,3,0,0);
+	allocateRLStruct(&last_action,3,0,0);
 
-	last_observation=allocateRLStructPointer(0,3,0);
+	last_observation=allocateRLStructPointer(0,7,0);
 
-	numActions = 101; // -50 ~ 50
-	numAngles = 181*extends; // -90 ~ 90
-	numAngleVelocity = 7*extends; // -3 ~ 3
-	numVelocity = 101*extends; // -50 ~ 50
+	numActions_foot = 21; // -10 ~ 10
+	numActions_waist = 23; // -10 ~ 10
+	numActions_heap = 19; // -10 ~ 10
+
+	numAngles_footleg = 11*extends; // -90 ~ 90
+	numAngles_footbody = 11*extends; // -90 ~ 90
+
+	numAngleVelocity_footleg = 5*extends; // -2 ~ 2
+	numAngleVelocity_footbody = 5*extends; // -2 ~ 2
+
+	numVelocity_foot = 15*extends; // -7 ~ 7
 
 	srand(time(0));
 	
-	value_function=(double *)calloc(numActions*numAngles*
-									numAngleVelocity*numVelocity, 
-									sizeof(double));
-	
+	value_function_foot = (double*)calloc(numActions_foot*
+								numAngles_footleg*numAngleVelocity_footleg*
+								numAngles_footbody*numAngleVelocity_footbody*
+								numVelocity_foot, 
+								sizeof(double));
+	value_function_waist = (double*)calloc(numActions_waist*
+								numAngles_footleg*numAngleVelocity_footleg*
+								numAngles_footbody*numAngleVelocity_footbody*
+								numVelocity_foot, 
+								sizeof(double));
+	value_function_heap = (double*)calloc(numActions_heap*
+								numAngles_footleg*numAngleVelocity_footleg*
+								numAngles_footbody*numAngleVelocity_footbody*
+								numVelocity_foot, 
+								sizeof(double));
+
+	printf("num : %d\n",numActions_heap*
+								numAngles_footleg*numAngleVelocity_footleg*
+								numAngles_footbody*numAngleVelocity_footbody*
+								numVelocity_foot);
 }
 
 const action_t *agent_start(const observation_t *this_observation){
-	int theIntAction = egreedy(this_observation->doubleArray[0], 
+
+/*
+	printf("%lf, %lf, %lf, %lf, %lf\n",
+		this_observation->doubleArray[0],this_observation->doubleArray[1],this_observation->doubleArray[2],
+		this_observation->doubleArray[3],this_observation->doubleArray[4]);
+	*/
+
+	int theIntAction_foot = egreedy(this_observation->doubleArray[0], 
 								this_observation->doubleArray[1],
-								this_observation->doubleArray[2]);
-	this_action.intArray[0] = theIntAction;
+								this_observation->doubleArray[2],
+								this_observation->doubleArray[3],
+								this_observation->doubleArray[4],
+								numActions_foot
+								);
+	int theIntAction_waist = egreedy(this_observation->doubleArray[0], 
+								this_observation->doubleArray[1],
+								this_observation->doubleArray[2],
+								this_observation->doubleArray[3],
+								this_observation->doubleArray[4],
+								numActions_waist
+								);
+	int theIntAction_heap = egreedy(this_observation->doubleArray[0], 
+								this_observation->doubleArray[1],
+								this_observation->doubleArray[2],
+								this_observation->doubleArray[3],
+								this_observation->doubleArray[4],
+								numActions_heap
+								);
+
+	this_action.intArray[0] = theIntAction_foot;
+	this_action.intArray[1] = theIntAction_waist;
+	this_action.intArray[2] = theIntAction_heap;
 
 	replaceRLStruct(&this_action, &last_action);
 	replaceRLStruct(this_observation, last_observation);
@@ -68,36 +134,91 @@ const action_t *agent_start(const observation_t *this_observation){
 }
 
 const action_t *agent_step(double reward, const observation_t *this_observation){
-	double newAngle = this_observation->doubleArray[0];
-	double newAngleVelocity = this_observation->doubleArray[1];
-	double newVelocity = this_observation->doubleArray[2];
+	double newAngle_footleg, newAngleVelocity_footleg, newVelocity_foot;
+	double newAngle_footbody, newAngleVelocity_footbody;
 
-	double lastAngle = last_observation->doubleArray[0];
-	double lastAngleVelocity = last_observation->doubleArray[1];
-	double lastVelocity = last_observation->doubleArray[2];
+printf("agent step %lf, %lf, %lf, %lf, %lf\n",
+		this_observation->doubleArray[0],this_observation->doubleArray[1],this_observation->doubleArray[2],
+		this_observation->doubleArray[3],this_observation->doubleArray[4]);
 
-	int lastAction = last_action.intArray[0];
-	int newAction = egreedy(newAngle, newAngleVelocity, newVelocity);
+	newAngle_footleg = this_observation->doubleArray[0];
+	newAngleVelocity_footleg = this_observation->doubleArray[1];
+	newVelocity_foot = this_observation->doubleArray[2];
+	newAngle_footbody = this_observation->doubleArray[3];
+	newAngleVelocity_footbody = this_observation->doubleArray[4];
+
+	double lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot;
+	double lastAngle_footbody, lastAngleVelocity_footbody;
+
+	lastAngle_footleg = last_observation->doubleArray[0];
+	lastAngleVelocity_footleg = last_observation->doubleArray[1];
+	lastVelocity_foot = last_observation->doubleArray[2];
+	lastAngle_footbody = last_observation->doubleArray[3];
+	lastAngleVelocity_footbody = last_observation->doubleArray[4];
+
+	int lastAction_foot, lastAction_waist, lastAction_heap;
+	int newAction_foot, newAction_waist, newAction_heap;
+
+	lastAction_foot = last_action.intArray[0];
+	lastAction_waist = last_action.intArray[1];
+	lastAction_heap = last_action.intArray[2];
+printf("<<<\n");
+	newAction_foot = egreedy(newAngle_footleg, newAngleVelocity_footleg, newVelocity_foot, newAngle_footbody, newAngleVelocity_footbody, numActions_foot);
+	printf("<<<2222\n");
+	newAction_waist = egreedy(newAngle_footleg, newAngleVelocity_footleg, newVelocity_foot, newAngle_footbody, newAngleVelocity_footbody, numActions_waist);
+printf("<<<33333\n");
+	newAction_heap = egreedy(newAngle_footleg, newAngleVelocity_footleg, newVelocity_foot, newAngle_footbody, newAngleVelocity_footbody, numActions_heap);
+
+	double Q_sa_foot, Q_sa_waist, Q_sa_heap;
+	double Q_sprime_aprime_foot, Q_sprime_aprime_waist, Q_sprime_aprime_heap;
+	double new_Q_sa_foot, new_Q_sa_waist, new_Q_sa_heap;
+int tes = calculateArrayIndex_foot(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_foot);
+printf("tes   %d\n",tes);
+	Q_sa_foot = value_function_foot[
+				calculateArrayIndex_foot(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_foot)
+			];
+	Q_sprime_aprime_foot = value_function_foot[
+				calculateArrayIndex_foot(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_foot)
+		];
+	new_Q_sa_foot = Q_sa_foot + sarsa_stepsize * (reward + sarsa_gamma * Q_sprime_aprime_foot - Q_sa_foot);
 	
-	double Q_sa = value_function[
-					calculateArrayIndex(lastAngle,lastAngleVelocity, 
-										lastVelocity, lastAction)
-					];
-	double Q_sprime_aprime = value_function[
-							calculateArrayIndex(newAngle, newAngleVelocity, 
-												newVelocity, newAction)
-							];
-	
-	double new_Q_sa=Q_sa + sarsa_stepsize * (reward + sarsa_gamma * Q_sprime_aprime - Q_sa);
-
 	if(!policy_frozen){
-		if(value_function[calculateArrayIndex(lastAngle,
-							lastAngleVelocity,lastVelocity, lastAction)] < new_Q_sa){
-			value_function[calculateArrayIndex(lastAngle,
-							lastAngleVelocity,lastVelocity, lastAction)] = new_Q_sa;
+		if(value_function_foot[calculateArrayIndex_foot(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_foot)] < new_Q_sa_foot){
+			value_function_foot[calculateArrayIndex_foot(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_foot)] = new_Q_sa_foot;
 		}
 	}
-	this_action.intArray[0]=newAction;
+	this_action.intArray[0] = newAction_foot;
+//int te = calculateArrayIndex_waist(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_waist);
+//printf("te %d\n",te);
+	Q_sa_waist = value_function_waist[
+				calculateArrayIndex_waist(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_waist)
+			];
+	Q_sprime_aprime_waist = value_function_waist[
+				calculateArrayIndex_waist(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_waist)
+		];
+	new_Q_sa_waist = Q_sa_waist + sarsa_stepsize * (reward + sarsa_gamma * Q_sprime_aprime_waist - Q_sa_waist);
+	
+	if(!policy_frozen){
+		if(value_function_waist[calculateArrayIndex_waist(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_waist)] < new_Q_sa_waist){
+			value_function_waist[calculateArrayIndex_waist(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_waist)] = new_Q_sa_waist;
+		}
+	}
+	this_action.intArray[1] = newAction_waist;
+
+	Q_sa_heap = value_function_heap[
+				calculateArrayIndex_heap(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_heap)
+			];
+	Q_sprime_aprime_heap = value_function_heap[
+				calculateArrayIndex_heap(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, newAction_heap)
+		];
+	new_Q_sa_heap = Q_sa_heap + sarsa_stepsize * (reward + sarsa_gamma * Q_sprime_aprime_heap - Q_sa_heap);
+	
+	if(!policy_frozen){
+		if(value_function_heap[calculateArrayIndex_heap(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, newAction_heap)] < new_Q_sa_heap){
+			value_function_heap[calculateArrayIndex_heap(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, newAction_heap)] = new_Q_sa_heap;
+		}
+	}
+	this_action.intArray[2] = newAction_heap;
 
 	replaceRLStruct(&this_action, &last_action);
 	replaceRLStruct(this_observation, last_observation);
@@ -106,24 +227,57 @@ const action_t *agent_step(double reward, const observation_t *this_observation)
 }
 
 void agent_end(double reward){
-	double lastAngle = last_observation->doubleArray[0];
-	double lastAngleVelocity = last_observation->doubleArray[1];
-	double lastVelocity = last_observation->doubleArray[2];
+	double lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot;
+	double lastAngle_footbody, lastAngleVelocity_footbody;
 
-	int lastAction=last_action.intArray[0];
+	lastAngle_footleg = last_observation->doubleArray[0];
+	lastAngleVelocity_footleg = last_observation->doubleArray[1];
+	lastVelocity_foot = last_observation->doubleArray[2];
+	lastAngle_footbody = last_observation->doubleArray[3];
+	lastAngleVelocity_footbody = last_observation->doubleArray[4];
 
-	double Q_sa = value_function[
-					calculateArrayIndex(lastAngle,lastAngleVelocity, 
-										lastVelocity, lastAction)
-					];
+	int lastAction_foot, lastAction_waist, lastAction_heap;
 
-	double new_Q_sa=Q_sa + sarsa_stepsize * (reward - Q_sa);
+	lastAction_foot = last_action.intArray[0];
+	lastAction_waist = last_action.intArray[1];
+	lastAction_heap = last_action.intArray[2];
+
+	double Q_sa_foot, Q_sa_waist, Q_sa_heap;
+	double new_Q_sa_foot, new_Q_sa_waist, new_Q_sa_heap;
+
+	Q_sa_foot = value_function_foot[
+				calculateArrayIndex_foot(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_foot)
+			];
+
+	new_Q_sa_foot = Q_sa_foot + sarsa_stepsize * (reward - Q_sa_foot);
 	
 	if(!policy_frozen){
-		if(value_function[calculateArrayIndex(lastAngle,
-							lastAngleVelocity,lastVelocity, lastAction)] < new_Q_sa){
-			value_function[calculateArrayIndex(lastAngle,
-							lastAngleVelocity,lastVelocity, lastAction)] = new_Q_sa;
+		if(value_function_foot[calculateArrayIndex_foot(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_foot)] < new_Q_sa_foot){
+			value_function_foot[calculateArrayIndex_foot(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_foot)] = new_Q_sa_foot;
+		}
+	}
+
+	Q_sa_waist = value_function_waist[
+				calculateArrayIndex_waist(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_waist)
+			];
+	
+	new_Q_sa_waist = Q_sa_waist + sarsa_stepsize * (reward - Q_sa_waist);
+	
+	if(!policy_frozen){
+		if(value_function_waist[calculateArrayIndex_waist(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_waist)] < new_Q_sa_waist){
+			value_function_waist[calculateArrayIndex_waist(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_waist)] = new_Q_sa_waist;
+		}
+	}
+
+	Q_sa_heap = value_function_heap[
+				calculateArrayIndex_heap(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_heap)
+			];
+	
+	new_Q_sa_heap = Q_sa_heap + sarsa_stepsize * (reward + sarsa_gamma - Q_sa_heap);
+	
+	if(!policy_frozen){
+		if(value_function_heap[calculateArrayIndex_heap(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_heap)] < new_Q_sa_heap){
+			value_function_heap[calculateArrayIndex_heap(lastAngle_footleg, lastAngleVelocity_footleg, lastVelocity_foot, lastAngle_footbody, lastAngleVelocity_footbody, lastAction_heap)] = new_Q_sa_heap;
 		}
 	}
 
@@ -137,9 +291,17 @@ void agent_cleanup(){
 	
 	freeRLStructPointer(last_observation);
 
-	if(value_function!=0){
-		free(value_function);
-		value_function=0;
+	if(value_function_foot!=0){
+		free(value_function_foot);
+		value_function_foot=0;
+	}
+	if(value_function_waist!=0){
+		free(value_function_waist);
+		value_function_waist=0;
+	}
+	if(value_function_heap!=0){
+		free(value_function_heap);
+		value_function_heap=0;
 	}
 }
 
@@ -189,7 +351,18 @@ void save_value_function(const char *fileName){
 	FILE *fp;
 	fp=fopen(fileName, "wb");
 
-	fwrite(value_function,sizeof(double),numActions*numAngles*numAngleVelocity*numVelocity,fp);
+	fwrite(value_function_foot, sizeof(double), numActions_heap*
+								numAngles_footleg*numAngleVelocity_footleg*
+								numAngles_footbody*numAngleVelocity_footbody*
+								numVelocity_foot, fp);
+	fwrite(value_function_waist, sizeof(double), numActions_heap*
+								numAngles_footleg*numAngleVelocity_footleg*
+								numAngles_footbody*numAngleVelocity_footbody*
+								numVelocity_foot, fp);
+	fwrite(value_function_heap, sizeof(double), numActions_heap*
+								numAngles_footleg*numAngleVelocity_footleg*
+								numAngles_footbody*numAngleVelocity_footbody*
+								numVelocity_foot, fp);
 	fclose(fp);
 }
 
@@ -197,24 +370,58 @@ void load_value_function(const char *fileName){
 	FILE *fp;
 	fp=fopen(fileName, "rb");
 
-	fread(value_function,sizeof(double),numActions*numAngles*numAngleVelocity*numVelocity,fp);
+	fread(value_function_foot, sizeof(double), numActions_heap*
+								numAngles_footleg*numAngleVelocity_footleg*
+								numAngles_footbody*numAngleVelocity_footbody*
+								numVelocity_foot, fp);
+	fread(value_function_waist, sizeof(double), numActions_heap*
+								numAngles_footleg*numAngleVelocity_footleg*
+								numAngles_footbody*numAngleVelocity_footbody*
+								numVelocity_foot, fp);
+	fread(value_function_heap, sizeof(double), numActions_heap*
+								numAngles_footleg*numAngleVelocity_footleg*
+								numAngles_footbody*numAngleVelocity_footbody*
+								numVelocity_foot, fp);
 	fclose(fp);
 }
 
-int egreedy(double angle, double angleVelocity, double velocity){
+int egreedy(double angle_footleg, double angleVelocity_footleg, double velocity_foot, double angle_footbody, double angleVelocity_footbody, int tmp){
 	int maxIndex = 0;
 	int a = 1;
 	int randFrequency = (int)(1.0f/sarsa_epsilon);
-
-	for(a=1;a<numActions;a++){
-		if(value_function[calculateArrayIndex(angle, angleVelocity, velocity,a)] > 
-			value_function[calculateArrayIndex(angle,angleVelocity, velocity,maxIndex)]){
-			maxIndex = a;
+printf("tmp %d\n",tmp);
+	if(tmp == numActions_foot){
+		for(a=1;a<tmp;a++){//printf("cal  %d\n",calculateArrayIndex_foot(angle_footleg, angleVelocity_footleg, velocity_foot, angle_footbody, angleVelocity_footbody, a));
+			if(value_function_foot[calculateArrayIndex_foot(angle_footleg, angleVelocity_footleg, velocity_foot, angle_footbody, angleVelocity_footbody, a)] > 
+				value_function_foot[calculateArrayIndex_foot(angle_footleg, angleVelocity_footleg, velocity_foot, angle_footbody, angleVelocity_footbody, maxIndex)]){
+				maxIndex = a;
+			}
+		}
+		if(value_function_foot[calculateArrayIndex_foot(angle_footleg, angleVelocity_footleg, velocity_foot, angle_footbody, angleVelocity_footbody, maxIndex)]==0.0){
+			return randInRange(tmp-1);
+		}
+	}else if(tmp == numActions_waist){
+		for(a=1;a<tmp;a++){
+			if(value_function_foot[calculateArrayIndex_waist(angle_footleg, angleVelocity_footleg, velocity_foot, angle_footbody, angleVelocity_footbody, a)] > 
+				value_function_foot[calculateArrayIndex_waist(angle_footleg, angleVelocity_footleg, velocity_foot, angle_footbody, angleVelocity_footbody, maxIndex)]){
+				maxIndex = a;
+			}
+		}
+		if(value_function_foot[calculateArrayIndex_waist(angle_footleg, angleVelocity_footleg, velocity_foot, angle_footbody, angleVelocity_footbody, maxIndex)]==0.0){
+			return randInRange(tmp-1);
+		}
+	}else if(tmp == numActions_heap){
+		for(a=1;a<tmp;a++){
+			if(value_function_heap[calculateArrayIndex_heap(angle_footleg, angleVelocity_footleg, velocity_foot, angle_footbody, angleVelocity_footbody, a)] > 
+				value_function_heap[calculateArrayIndex_heap(angle_footleg, angleVelocity_footleg, velocity_foot, angle_footbody, angleVelocity_footbody, maxIndex)]){
+				maxIndex = a;
+			}
+		}
+		if(value_function_heap[calculateArrayIndex_heap(angle_footleg, angleVelocity_footleg, velocity_foot, angle_footbody, angleVelocity_footbody, maxIndex)]==0.0){
+			return randInRange(tmp-1);
 		}
 	}
-	if(value_function[calculateArrayIndex(angle, angleVelocity, velocity,maxIndex)]==0.0){
-		return randInRange(numActions-1);
-	}
+
 	return maxIndex;
 }
 
@@ -225,9 +432,33 @@ int randInRange(int max){
 	return (int)x;
 }
 
-int calculateArrayIndex(double theAngle, double theAngleVelocity, 
-						double theVelocity, int theAction){
-	return ((int)(theAngle*extends))*numAngleVelocity*numVelocity*numActions
-			+((int)(theAngleVelocity*extends))*numVelocity*numActions
-			+((int)(theVelocity*extends))*numActions+theAction;
+int calculateArrayIndex_foot(double angle_footleg, double angleVelocity_footleg, 
+							double velocity_foot, double angle_footbody, double angleVelocity_footbody, int action){
+	printf("cal foot %lf, %lf, %lf, %lf, %lf,%d\n",angle_footleg, angleVelocity_footleg, velocity_foot, angle_footbody, angleVelocity_footbody, action);
+	return ((int)(angle_footleg*extends))*numAngleVelocity_footleg*numVelocity_foot*numAngles_footbody*numAngleVelocity_footbody*numActions_foot
+			+ ((int)(angleVelocity_footleg*extends))*numVelocity_foot*numAngles_footbody*numAngleVelocity_footbody*numActions_foot
+			+((int)(velocity_foot*extends))*numAngles_footbody*numAngleVelocity_footbody*numActions_foot
+			+((int)(angle_footbody*extends))*numAngleVelocity_footbody*numActions_foot
+			+((int)(angleVelocity_footbody*extends))*numActions_foot
+			+action;
+}
+
+int calculateArrayIndex_waist(double angle_footleg, double angleVelocity_footleg, 
+							double velocity_foot, double angle_footbody, double angleVelocity_footbody, int action){
+	return ((int)(angle_footleg*extends))*numAngleVelocity_footleg*numVelocity_foot*numAngles_footbody*numAngleVelocity_footbody*numActions_waist
+			+ ((int)(angleVelocity_footleg*extends))*numVelocity_foot*numAngles_footbody*numAngleVelocity_footbody*numActions_waist
+			+((int)(velocity_foot*extends))*numAngles_footbody*numAngleVelocity_footbody*numActions_waist
+			+((int)(angle_footbody*extends))*numAngleVelocity_footbody*numActions_waist
+			+((int)(angleVelocity_footbody*extends))*numActions_waist
+			+action;
+}
+
+int calculateArrayIndex_heap(double angle_footleg, double angleVelocity_footleg, 
+							double velocity_foot, double angle_footbody, double angleVelocity_footbody, int action){
+	return ((int)(angle_footleg*extends))*numAngleVelocity_footleg*numVelocity_foot*numAngles_footbody*numAngleVelocity_footbody*numActions_heap
+			+ ((int)(angleVelocity_footleg*extends))*numVelocity_foot*numAngles_footbody*numAngleVelocity_footbody*numActions_heap
+			+((int)(velocity_foot*extends))*numAngles_footbody*numAngleVelocity_footbody*numActions_heap
+			+((int)(angle_footbody*extends))*numAngleVelocity_footbody*numActions_heap
+			+((int)(angleVelocity_footbody*extends))*numActions_heap
+			+action;
 }
