@@ -44,7 +44,7 @@ const observation_t *env_start(){
 
 	angle_footleg = pendulum2.get_angle_footleg();
 	angleVelocity_footleg = pendulum2.get_angleVelocity_footleg() + 2;
-	velocity_foot = pendulum2.get_velocity_foot() + 7;
+	velocity_foot = pendulum2.get_velocity_foot() + 15;
 	angle_footbody = pendulum2.get_angle_footbody();
 	angleVelocity_footbody = pendulum2.get_angleVelocity_footbody() + 2;
 
@@ -91,10 +91,20 @@ const reward_observation_terminal_t *env_step2() {
 
 	angle_footleg = pendulum2.get_angle_footleg();
 	angleVelocity_footleg = pendulum2.get_angleVelocity_footleg() + 2;
-	velocity_foot = pendulum2.get_velocity_foot() + 7;
+	velocity_foot = pendulum2.get_velocity_foot() + 15;
 	angle_footbody = pendulum2.get_angle_footbody();
 	angleVelocity_footbody = pendulum2.get_angleVelocity_footbody() + 2;
 
+	if(velocity_foot>31){
+		printf("vel 31 over ~~%d\t",velocity_foot);
+		velocity_foot = 31;
+	}else if(velocity_foot>11){
+		//printf("vel 11 over ~~%d\n",velocity_foot);
+	}
+	if(velocity_foot<0){
+		printf("vel 0 under  ~~%d\t",velocity_foot);
+		velocity_foot = 0;
+	}
 	
 	terminal = check_terminal(angle_footleg, angleVelocity_footleg, velocity_foot, 
 					angle_footbody, angleVelocity_footbody);
@@ -134,7 +144,7 @@ int calculate_reward(double angle_footleg, double angleVelocity_footleg, double 
     	&&
     	(int)angleVelocity_footleg==2
     	&& 
-    	(int)velocity_foot==7
+    	(int)velocity_foot==15
     	&&
     	(int)angle_footbody<=94 && (int)angle_footbody>=86
     	&&
@@ -157,7 +167,7 @@ int check_terminal(double angle_footleg, double angleVelocity_footleg, double ve
     	&&
     	(int)angleVelocity_footleg==2
     	&& 
-    	(int)velocity_foot==7
+    	(int)velocity_foot==15
     	&&
     	(int)angle_footbody<=94 && (int)angle_footbody>=86
     	&&

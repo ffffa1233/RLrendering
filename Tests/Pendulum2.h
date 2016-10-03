@@ -70,7 +70,7 @@ class Pendulum2: public Test
 
 		rectangleShape.SetAsBox(2.5, 2);
 		rectangleFixtureDef.shape = &rectangleShape;
-		rectangleFixtureDef.density = 0.05;
+		rectangleFixtureDef.density = 0.12;
 
 		myBodyDef.position.Set(0, 2);
 		horizonBody = m_world->CreateBody(&myBodyDef);

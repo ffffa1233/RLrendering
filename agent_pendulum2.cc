@@ -67,7 +67,7 @@ void agent_init(const char* task_spec){
 	numAngleVelocity_footleg = 5*extends; // -2 ~ 2
 	numAngleVelocity_footbody = 5*extends; // -2 ~ 2
 
-	numVelocity_foot = 15*extends; // -7 ~ 7
+	numVelocity_foot = 31*extends; // -10 ~ 10
 
 	srand(time(0));
 	
@@ -349,11 +349,11 @@ void save_value_function(const char *fileName){
 	FILE *fp;
 	fp=fopen(fileName, "wb");
 
-	fwrite(value_function_foot, sizeof(double), numActions_heap*
+	fwrite(value_function_foot, sizeof(double), numActions_foot*
 								numAngles_footleg*numAngleVelocity_footleg*
 								numAngles_footbody*numAngleVelocity_footbody*
 								numVelocity_foot, fp);
-	fwrite(value_function_waist, sizeof(double), numActions_heap*
+	fwrite(value_function_waist, sizeof(double), numActions_waist*
 								numAngles_footleg*numAngleVelocity_footleg*
 								numAngles_footbody*numAngleVelocity_footbody*
 								numVelocity_foot, fp);
@@ -368,11 +368,11 @@ void load_value_function(const char *fileName){
 	FILE *fp;
 	fp=fopen(fileName, "rb");
 
-	fread(value_function_foot, sizeof(double), numActions_heap*
+	fread(value_function_foot, sizeof(double), numActions_foot*
 								numAngles_footleg*numAngleVelocity_footleg*
 								numAngles_footbody*numAngleVelocity_footbody*
 								numVelocity_foot, fp);
-	fread(value_function_waist, sizeof(double), numActions_heap*
+	fread(value_function_waist, sizeof(double), numActions_waist*
 								numAngles_footleg*numAngleVelocity_footleg*
 								numAngles_footbody*numAngleVelocity_footbody*
 								numVelocity_foot, fp);
